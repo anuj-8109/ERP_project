@@ -1,0 +1,291 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ERP Budgeting</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+    {% block css %}
+    <link rel="stylesheet" href="{% static 'budget/request_budget.css' %}">
+    {% endblock %}
+  </head>
+
+  <body>
+    <div class="container">
+      <!-- Navigation -->
+      <nav class="nav-bar" role="navigation">
+        <div class="nav-container">
+          <h1 class="logo">ERP Budgeting</h1>
+          <ul class="nav-links">
+            <li><a href="1.html">Budget Planning</a></li>
+            <li><a href="5.html">Allocations</a></li>
+            <li><a href="#">Reports</a></li>
+            <li><a href="#">Settings</a></li>
+          </ul>
+        </div>
+      </nav>
+
+      <section class="form-section">
+        <form id="budget-form">
+          <div class="form-group">
+            <label for="company-select">Select Company:</label>
+            <select id="company-select" onchange="loadCompanyDetails()">
+              <option value="">Select Company</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="fiscal-year">Fiscal Year:</label>
+            <input type="number" id="fiscal-year" readonly />
+          </div>
+
+          <div class="form-group">
+            <label for="department-select">Department:</label>
+            <select id="department-select" onchange="loadDepartmentBudget()">
+              <option value="">Select Department</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="budget-allocation">Budget Allocated:</label>
+            <input type="text" id="budget-allocation" readonly />
+          </div>
+        </form>
+      </section>
+
+      <!-- Table Section -->
+      <section class="table-section">
+        <div class="button-container">
+          <button type="button" class="btn btn-primary" id="add-row">
+            Add Row
+          </button>
+        </div>
+        <table class="budget-table">
+          <thead>
+            <tr>
+              <th>Budget Name:</th>
+              <th>Start Date:</th>
+              <th>End Date:</th>
+              <th>Comment:</th>
+              <th>Allocated Amount:</th>
+              <th>Actions:</th>
+            </tr>
+          </thead>
+          <tbody id="budget-tbody">
+            <tr>
+              <td>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter budget name"
+                  required
+                  aria-label="Budget Name"
+                />
+              </td>
+              <td>
+                <input
+                  type="date"
+                  class="form-control"
+                  required
+                  aria-label="Start Date"
+                />
+              </td>
+              <td>
+                <input
+                  type="date"
+                  class="form-control"
+                  required
+                  aria-label="End Date"
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter comment"
+                  aria-label="Comment"
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  class="form-control"
+                  placeholder="Enter allocated amount"
+                  required
+                  aria-label="Allocated Amount"
+                />
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="btn btn-danger delete-row"
+                  onclick="confirmDelete(this)"
+                >
+                  Delete
+                </button>
+              </td>
+              <td>
+                <button
+                    type="button"
+                    class="btn btn-green request-row"
+                    onclick="sendBudgetRequest(this)"
+                  >
+                    Request
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <script>
+      async function loadCompanies() {
+        const response = await fetch('/api/companies/');
+        const companies = await response.json();
+        const select = document.getElementById('company-select');
+
+        companies.forEach((company) => {
+          const option = document.createElement('option');
+          option.value = company.id;
+          option.textContent = company.name;
+          select.appendChild(option);
+        });
+      }
+
+      async function loadCompanyDetails() {
+        const companyId = document.getElementById('company-select').value;
+        if (!companyId) return;
+
+        try {
+          const response = await fetch(`/api/company/${companyId}/`);
+          if (!response.ok) throw new Error('Failed to fetch company details');
+          const company = await response.json();
+
+          document.getElementById('fiscal-year').value = company.budget_year;
+
+          const deptResponse = await fetch(`/api/departments/${companyId}/`);
+          if (!deptResponse.ok) throw new Error('Failed to fetch departments');
+          const departments = await deptResponse.json();
+
+          const departmentSelect = document.getElementById('department-select');
+          departmentSelect.innerHTML =
+            '<option value="">Select Department</option>';
+
+          departments.forEach((dept) => {
+            const option = document.createElement('option');
+            option.value = dept;
+            option.textContent = dept;
+            departmentSelect.appendChild(option);
+          });
+        } catch (error) {
+          console.error('Error loading company details:', error);
+        }
+      }
+
+      async function loadDepartmentBudget() {
+        const companyId = document.getElementById('company-select').value;
+        const departmentName =
+          document.getElementById('department-select').value;
+
+        if (!companyId || !departmentName) return;
+
+        try {
+          const response = await fetch(
+            `/api/department-budgets/${companyId}/`
+          );
+          if (!response.ok)
+            throw new Error('Failed to fetch department budgets');
+
+          const budgetData = await response.json();
+          const selectedBudget = budgetData.find(
+            (b) => b.department === departmentName
+          );
+
+          if (selectedBudget) {
+            const allocatedAmount = parseFloat(selectedBudget.allocated_amount);
+            document.getElementById('budget-allocation').value =
+              allocatedAmount;
+
+            // const usedBudget = selectedBudget.used_budget || 0;
+            // const remainingBudget = allocatedAmount - usedBudget;
+            // document.getElementById('remaining-budget').value = remainingBudget;
+          }
+        } catch (error) {
+          console.error('Error loading department budget:', error);
+        }
+      }
+
+      document
+        .getElementById('add-row')
+        .addEventListener('click', function () {
+          const tbody = document.getElementById('budget-tbody');
+          const newRow = document.createElement('tr');
+          newRow.innerHTML = `
+            <td><input type="text" class="form-control" placeholder="Enter budget name" required aria-label="Budget Name"></td>
+            <td><input type="date" class="form-control" required aria-label="Start Date"></td>
+            <td><input type="date" class="form-control" required aria-label="End Date"></td>
+            <td><input type="text" class="form-control" placeholder="Enter comment" aria-label="Comment"></td>
+            <td><input type="number" class="form-control" placeholder="Enter allocated amount" required aria-label="Allocated Amount"></td>
+            <td><button type="button" class="btn btn-danger delete-row" onclick="confirmDelete(this)">Delete</button></td>
+            <td><button type="button" class="btn btn-green request-row" onclick="sendBudgetRequest(this)"> Request </button</td>`;
+          tbody.appendChild(newRow);
+        });
+
+        function sendBudgetRequest(button) {
+    const row = button.closest('tr');
+    const budgetName = row.querySelector('[aria-label="Budget Name"]').value;
+    const startDate = row.querySelector('[aria-label="Start Date"]').value;
+    const endDate = row.querySelector('[aria-label="End Date"]').value;
+    const comment = row.querySelector('[aria-label="Comment"]').value;
+    const allocatedAmount = row.querySelector('[aria-label="Allocated Amount"]').value;
+    const companyId = document.getElementById('company-select').value;
+    const departmentName = document.getElementById('department-select').value;
+
+    if (!companyId || !departmentName) {
+      alert("Please select a company and department.");
+      return;
+    }
+
+    const data = {
+      budget_name: budgetName,
+      start_date: startDate,
+      end_date: endDate,
+      comment: comment,
+      allocated_amount: allocatedAmount,
+      company: companyId,
+      department: departmentName,
+      csrfmiddlewaretoken: '{{ csrf_token }}' // Include CSRF token for POST requests
+    };
+
+    fetch('/create/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': data.csrfmiddlewaretoken,
+      },
+      body: JSON.stringify(data)
+    })
+      .then(response => response.text())
+      .then(result => {
+        alert(result);
+        button.disabled = true; // Disable the button to avoid duplicate requests
+      })
+      .catch(error => console.error('Error:', error));
+    }
+
+      function confirmDelete(button) {
+        const row = button.closest('tr');
+        if (confirm('Are you sure you want to delete this row?')) {
+          row.remove();
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', loadCompanies);
+    </script>
+  </body>
+</html>

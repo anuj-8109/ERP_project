@@ -1,0 +1,206 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Dashboard</title>
+    {% block css %}
+    <link rel="stylesheet" href="{% static 'budget/overview.css' %}">
+    {% endblock %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <h1 class="logo">ERP Budgeting</h1>
+            <div class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="{% url 'dashboard' %}">Budget Planning</a></li>
+                <li><a href="5.html">Allocations</a></li>
+                <li><a href="{% url 'budgetReport' %}">View Report</a></li>
+                <li><a href="#">Settings</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header>
+        <div class="header-container">
+            <h2>Budget Overview Dashboard</h2>
+            <div class="dropdown">
+                <button class="primary-btn" id="newBudgetBtn">Add New Budget <i class="fas fa-caret-down"></i></button>
+                <div class="dropdown-content" id="dropdownContent">
+                    <a href="{% url 'create_company' %}">Company</a>
+                    <a href="{% url 'manage_departments' %}">Department</a>
+                    <a href="{% url 'request_budget' %}">Request Budget</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="stats-section">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Total Allocated Budget</h3>
+                <p>$500,000</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Total Spent</h3>
+                <p>$200,000</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-piggy-bank"></i>
+            </div>
+            <div class="stat-info">
+                <h3>Remaining Budget</h3>
+                <p>$300,000</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="charts-section">
+        <div class="chart-container">
+            <h3>Spending Trends</h3>
+            <canvas id="lineChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h3>Budget by Category</h3>
+            <canvas id="pieChart"></canvas>
+        </div>
+    </section>
+
+    <script>
+        // JavaScript for the dropdown menu
+        const newBudgetBtn = document.getElementById('newBudgetBtn');
+        const dropdownContent = document.getElementById('dropdownContent');
+    
+        newBudgetBtn.addEventListener('click', () => {
+            dropdownContent.classList.toggle('show'); // Toggle visibility
+        });
+    
+        // Optional: Close the dropdown if the user clicks outside of it
+        window.onclick = function(event) {
+            if (!event.target.matches('#newBudgetBtn')) {
+                if (dropdownContent.classList.contains('show')) {
+                    dropdownContent.classList.remove('show');
+                }
+            }
+        };
+        
+        // Line Chart for Spending Trends
+        const ctxLine = document.getElementById('lineChart').getContext('2d');
+        const lineChart = new Chart(ctxLine, {
+            type: 'line',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+                datasets: [{
+                    label: 'Spending ($)',
+                    data: [1200, 1900, 3000, 500, 2200, 1800],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: true,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    tension: 0.3 // Smooth lines
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            boxWidth: 20,
+                            padding: 15,
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(200, 200, 200, 0.5)',
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(200, 200, 200, 0.5)',
+                        }
+                    }
+                }
+            }
+        });
+
+        // Pie Chart for Budget by Category
+        const ctxPie = document.getElementById('pieChart').getContext('2d');
+        const pieChart = new Chart(ctxPie, {
+            type: 'pie',
+            data: {
+                labels: ['Project', 'Company', 'Vendors', 'Savings'],
+                datasets: [{
+                    label: 'Budget Distribution',
+                    data: [300, 800, 200, 150],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 20,
+                            padding: 15,
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                    }
+                }
+            }
+        });
+
+        // JavaScript for the hamburger menu
+        const hamburger = document.getElementById('hamburger');
+        const navLinks = document.getElementById('navLinks');
+
+        hamburger.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+    </script>
+</body>
+</html>

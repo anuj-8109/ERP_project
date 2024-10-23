@@ -1,0 +1,380 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ERP Budgeting</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="{% static 'budget/manage_departments.css' %}" />
+    <style>
+      /* Base Styles */
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        padding: 20px;
+      }
+      .nav-bar {
+        background-color: #4a90e2;
+        padding: 10px 20px;
+      }
+      .nav-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .logo {
+        color: white;
+        font-size: 24px;
+      }
+      .nav-links {
+        list-style: none;
+        display: flex;
+      }
+      .nav-links li {
+        margin-left: 20px;
+      }
+      .nav-links li a {
+        color: white;
+        text-decoration: none;
+        font-size: 16px;
+      }
+      .hamburger {
+        display: block;
+        cursor: pointer;
+      }
+      .hamburger i {
+        font-size: 24px;
+        color: white;
+      }
+      @media (min-width: 768px) {
+        .nav-links {
+          display: flex;
+        }
+        .hamburger {
+          display: none;
+        }
+      }
+      @media (max-width: 768px) {
+        .nav-links {
+          flex-direction: column;
+          position: absolute;
+          top: 60px;
+          left: 0;
+          width: 100%;
+          background-color: #333;
+          padding: 10px;
+        }
+        .nav-links li {
+          margin: 10px 0;
+        }
+      }
+      .success-popup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border: 1px solid #ccc;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+      }
+      .success-popup h2 {
+        margin: 0 0 10px;
+      }
+      .btn {
+        padding: 10px 15px;
+        margin-top: 10px;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background-color: #007bff;
+        color: white;
+        border: none;
+      }
+      .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <nav class="nav-bar">
+        <div class="nav-container">
+          <h1 class="logo">ERP Budgeting</h1>
+          <div class="hamburger" onclick="toggleMenu()">
+            <i class="fas fa-bars"></i>
+          </div>
+          <ul class="nav-links" id="nav-links">
+            <li><a href="1.html">Budget Planning</a></li>
+            <li><a href="5.html">Allocations</a></li>
+            <li><a href="#">Reports</a></li>
+            <li><a href="#">Settings</a></li>
+          </ul>
+        </div>
+      </nav>
+
+      <section class="form-section">
+        <form id="budget-form">
+          <div class="form-group">
+            <label for="company-select">Company:</label>
+            <select id="company-select" onchange="loadCompanyDetails()">
+              <option value="">Select Company</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="company-name">Company Name:</label>
+            <input type="text" id="company-name" readonly />
+          </div>
+
+          <div class="form-group">
+            <label for="budget-allocation">Budget Allocated:</label>
+            <input type="text" id="budget-allocation" readonly />
+          </div>
+          
+          <div class="form-group">
+            <label for="remaining-budget">Remaining Budget:</label>
+            <input type="text" id="remaining-budget" readonly />
+          </div>
+
+          <div class="form-group">
+            <label for="fiscal-year">Fiscal Year:</label>
+            <input type="number" id="fiscal-year" readonly />
+          </div>
+
+          <div class="form-group">
+            <label for="departments">Departments:</label>
+            <input
+              type="text"
+              id="departments"
+              placeholder="Enter departments, comma-separated"
+            />
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="submitDepartments()"
+            >
+              Submit Departments
+            </button>
+          </div>
+
+        </form>
+      </section>
+
+      <section class="table-section">
+        <table class="budget-table">
+          <thead>
+            <tr>
+              <th>Department</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Allocated Amount</th>
+            </tr>
+          </thead>
+          <tbody id="budget-tbody"></tbody>
+        </table>
+        <button
+          class="btn btn-primary"
+          type="button"
+          onclick="submitBudgets()"
+        >
+          Submit Budgets
+        </button>
+      </section>
+
+      <div class="success-popup" id="success-popup">
+        <h2>Form Submitted Successfully!</h2>
+        <p>Details:</p>
+        <ul id="form-details"></ul>
+        <button class="btn btn-secondary" onclick="closePopup()">
+          Close
+        </button>
+      </div>
+    </div>
+
+    <script>
+      async function loadCompanies() {
+        const response = await fetch('/api/companies/');
+        const companies = await response.json();
+        const select = document.getElementById('company-select');
+
+        companies.forEach(company => {
+          const option = document.createElement('option');
+          option.value = company.id;
+          option.textContent = company.name;
+          select.appendChild(option);
+        });
+      }
+
+      async function loadCompanyDetails() {
+    const companyId = document.getElementById('company-select').value;
+    if (!companyId) return;
+
+    const response = await fetch(`/api/company/${companyId}/`);
+    const company = await response.json();
+
+    // Fill company details
+    document.getElementById('company-name').value = company.name;
+    document.getElementById('budget-allocation').value = company.allocated_budget;
+    document.getElementById('fiscal-year').value = company.budget_year;
+
+    // Fetch departments and their budget details for the selected company
+    const budgetResponse = await fetch(`/api/department-budgets/${companyId}/`); // Updated line
+    const budgets = await budgetResponse.json();
+
+    // Fill departments input and budget table
+    const departmentsInput = document.getElementById('departments');
+    const tbody = document.getElementById('budget-tbody');
+    
+    // Clear existing rows
+    tbody.innerHTML = '';
+
+    // Populate the table with department budget details
+    let totalDepartmentBudget = 0;
+    budgets.forEach(budget => {
+        totalDepartmentBudget += parseFloat(budget.allocated_amount) || 0;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${budget.department}</td>
+            <td><input type="date" value="${budget.start_date || ''}" required /></td>
+            <td><input type="date" value="${budget.end_date || ''}" required /></td>
+            <td><input type="number" value="${budget.allocated_amount || ''}" required /></td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    updateRemainingBudget();
+    // Update departments input field with department names
+    const departmentNames = budgets.map(b => b.department);
+    departmentsInput.value = departmentNames.join(', ') || ''; // Join department names with commas
+}
+
+function updateRemainingBudget() {
+    const allocatedBudget = parseFloat(document.getElementById('budget-allocation').value) || 0;
+    let totalDepartmentBudget = 0;
+
+    // Sum all department budgets
+    document.querySelectorAll('#budget-tbody input[type="number"]').forEach(input => {
+        totalDepartmentBudget += parseFloat(input.value) || 0;
+    });
+
+    const remainingBudget = allocatedBudget - totalDepartmentBudget;
+    document.getElementById('remaining-budget').value = remainingBudget.toFixed(2);
+}
+
+
+      async function submitDepartments() {
+                const companyId = document.getElementById('company-select').value;
+                const departments = document.getElementById('departments').value
+                .split(',')
+                .map(d => d.trim());
+
+                const response = await fetch(`/api/add-departments/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ company_id: companyId, departments }),
+                });
+
+                if (response.ok) {
+                    // **Update the Budget Table with New Departments**
+                    const tbody = document.getElementById('budget-tbody');
+                    tbody.innerHTML = ''; // Clear previous table rows
+
+                    departments.forEach(department => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${department}</td>
+                            <td><input type="date" required /></td>
+                            <td><input type="date" required /></td>
+                            <td><input type="number" required /></td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+
+                    alert('Departments updated successfully!');
+                } else {
+                    alert('Failed to update departments.');
+                }
+            }
+
+
+
+            async function submitBudgets() {
+    const tbody = document.getElementById('budget-tbody');
+    const rows = tbody.querySelectorAll('tr');
+    const data = [];
+
+    // Collect budget data from each row
+    rows.forEach(row => {
+        const department = row.cells[0].textContent.trim();  // Department name
+        const startDate = row.cells[1].querySelector('input').value;
+        const endDate = row.cells[2].querySelector('input').value;
+        const amount = row.cells[3].querySelector('input').value;
+
+        // Add company_id to each budget entry (you might need to fetch this from your context)
+        const company_id = document.getElementById('company-select').value;
+        
+        data.push({ company_id, department, startDate, endDate, amount });  // Include company_id
+    });
+
+    // Submit each budget entry via POST request
+    for (const item of data) {
+        try {
+            const response = await fetch('/api/submit-budget/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(item),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                console.error(`Error: ${result.error}`);
+                alert(`Failed to submit budget for ${item.department}: ${result.error}`);
+                return;
+            }
+        } catch (error) {
+            console.error('Network error:', error);
+            alert('Network error. Please try again.');
+            return;
+        }
+    }
+
+    // Show success popup and clear form
+    document.getElementById('form-details').innerHTML = '';
+    data.forEach(item => {
+        const detailsItem = document.createElement('li');
+        detailsItem.textContent = `Department: ${item.department}, Start Date: ${item.startDate}, End Date: ${item.endDate}, Amount: ${item.amount}`;
+        document.getElementById('form-details').appendChild(detailsItem);
+    });
+    document.getElementById('success-popup').style.display = 'block';
+}
+
+
+
+      function closePopup() {
+        document.getElementById('success-popup').style.display = 'none';
+      }
+
+      function toggleMenu() {
+        const navLinks = document.getElementById('nav-links');
+        navLinks.style.display = navLinks.style.display === 'block' ? 'none' : 'block';
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        loadCompanies(); // Load companies on page load
+      });
+    </script>
+  </body>
+</html>

@@ -37,6 +37,28 @@ urlpatterns = [
     path("reset/<uidb64>/<token>", authentication_views.PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
     path("reset/done/", authentication_views.PasswordResetCompleteView.as_view(), name="password_reset_complete"),
     
+################################################## Budgeting & Forecasting #############################################################
+
+    path('overview/', views.overview, name='overview'),
+
+    path('create-company/', views.create_company_view, name='create_company'),
+    path('api/create-company/', views.create_company, name='create_company_api'),
+    path('api/companies/', views.get_companies, name='get_companies'),
+    path('api/company/<int:company_id>/', views.get_company, name='get_company'),
+
+    path('manage-departments/', views.manage_departments_view, name='manage_departments'),
+    path('api/departments/<int:company_id>/', views.get_departments, name='get_departments'),
+    path('api/add-departments/', views.add_departments, name='add_departments'),
+    path('api/add-department-budget/', views.add_department_budget, name='add_department_budget'),
+
+    path('api/submit-budget/', views.submit_budget, name='submit_budget'),
+    path('api/department-budgets/<int:company_id>/', views.get_department_budgets, name='get_department_budgets'),
+
+    path('request-budget/', views.requestBudget, name='request_budget'),
+    path('create/', views.create_budget_request, name='create_budget_request'),
+    path('budget/<int:budget_id>/', views.budget_request_detail, name='budget_request_detail'),
+    
+    path('budgetReport/', views.report_view, name='budgetReport'),
     
 ]
 

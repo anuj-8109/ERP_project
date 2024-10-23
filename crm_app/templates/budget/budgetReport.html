@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company and Department Report</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+    color: #333;
+}
+
+h1, h2, h3 {
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    color: #fff;
+}
+
+/* Navigation */
+nav {
+    background-color: #4a90e2;
+    padding: 15px 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: relative; /* Ensure the nav stays within bounds */
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    position: relative; /* Keep hamburger within container */
+}
+
+.logo {
+    font-size: 24px;
+    color: #fff;
+}
+
+/* Hamburger menu styles for mobile */
+.hamburger-menu {
+    display: none; /* Hidden on larger screens */
+    flex-direction: column;
+    cursor: pointer;
+}
+
+.hamburger-menu span {
+    background-color: #fff;
+    height: 3px;
+    width: 25px;
+    margin: 4px;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+}
+
+.nav-links li {
+    margin: 0 15px;
+}
+
+.nav-links a {
+    font-size: 16px;
+    color: #fff;
+    font-weight: 500;
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+/* Filter and Search Section */
+.filter-search {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap; /* Allows wrapping on smaller screens */
+    margin-bottom: 20px;
+}
+
+.search-box input {
+    padding: 10px;
+    width: 100%; /* Full width for smaller devices */
+    max-width: 250px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.filter-box {
+    display: flex;
+    align-items: center;
+}
+
+.filter-box label {
+    margin-right: 10px;
+    font-weight: 500;
+    color: #333;
+}
+
+.filter-box select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* Allocations Table Section */
+.allocations-section h2 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #4a90e2;
+}
+
+.allocations-section {
+    background-color: #fff;
+    padding: 20px;
+    margin-top: 30px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+.allocations-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.allocations-table th, .allocations-table td {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.allocations-table th {
+    background-color: #f4f4f9;
+    font-weight: bold;
+    color: #333;
+}
+
+.allocations-table td {
+    background-color: #fff;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    /* Make nav-links collapse on smaller screens */
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        background-color: #4a90e2;
+        position: absolute;
+        top: 60px;
+        right: 0;
+        width: 100%;
+        padding: 10px 0;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Ensure the hamburger menu shows */
+    .hamburger-menu {
+        display: flex; /* Show on mobile screens */
+        position: absolute; /* Position it inside the nav */
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .nav-links.active {
+        display: flex; /* Show navigation links when active */
+    }
+
+    .nav-links li {
+        margin: 15px 0;
+        text-align: center;
+    }
+
+    /* Hamburger menu animation */
+    .hamburger-menu.active span:nth-child(1) {
+        transform: rotate(-45deg) translate(-5px, 6px);
+    }
+
+    .hamburger-menu.active span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .hamburger-menu.active span:nth-child(3) {
+        transform: rotate(45deg) translate(-5px, -6px);
+    }
+
+    /* Stack search and filter vertically */
+    .filter-search {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    /* Ensure the search box and filter box take full width on smaller screens */
+    .search-box input,
+    .filter-box select {
+        width: 100%; /* Full width on small screens */
+        margin-bottom: 10px; /* Add spacing between elements */
+    }
+
+    /* Adjust allocations section padding */
+    .allocations-section {
+        padding: 15px;
+    }
+
+    /* Ensure the table is scrollable horizontally */
+    .allocations-section {
+        overflow-x: auto;
+    }
+
+    .allocations-table {
+        min-width: 600px; /* Ensure minimum width for scrolling */
+    }
+}
+
+/* Responsive Table for Small Screens */
+@media (max-width: 576px) {
+    .nav-container {
+        flex-direction: column;
+    }
+
+    .logo {
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+
+    .allocations-table th, .allocations-table td {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    /* Stack table content for small screens */
+    .allocations-table, .allocations-table thead, .allocations-table tbody, .allocations-table th, .allocations-table td, .allocations-table tr {
+        display: block;
+        width: 100%;
+    }
+
+    /* Make the table headers appear before each row on small screens */
+    .allocations-table thead {
+        display: none;
+    }
+
+    .allocations-table td {
+        position: relative;
+        padding-left: 50%;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .allocations-table td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 45%;
+        padding-left: 15px;
+        font-weight: bold;
+        white-space: nowrap;
+        text-align: left;
+    }
+
+    .allocations-table td:last-child {
+        border-bottom: 0;
+    }
+
+    .container {
+        padding: 0 10px;
+    }
+
+    .hamburger-menu {
+        right: 10px;
+    }
+
+    input[type="text"], select {
+        font-size: 14px;
+    }
+
+    .submit-btn {
+        width: 100%;
+    }
+
+    .allocations-table th, .allocations-table td {
+        padding: 10px;
+        font-size: 12px;
+    }
+}
+
+/* Ensure hamburger menu stays visible when active */
+.hamburger-menu.active {
+    position: fixed;
+    top: 15px;
+    right: 20px;
+}
+
+/* Add transition for smooth menu toggle */
+.nav-links {
+    transition: all 0.3s ease-in-out;
+}
+
+.btn {
+    background-color: #4CAF50; /* Green background */
+    color: white; /* White text */
+    border: none; /* No border */
+    padding: 10px 20px; /* Padding for size */
+    font-size: 16px; /* Font size */
+    font-weight: bold; /* Bold text */
+    cursor: pointer; /* Pointer on hover */
+    border-radius: 5px; /* Rounded corners */
+    transition: background-color 0.3s, transform 0.2s; /* Smooth transition */
+}
+
+.btn:hover {
+    background-color: #45a049; /* Darker green on hover */
+    transform: scale(1.05); /* Slight zoom effect */
+}
+
+.btn:active {
+    background-color: #3e8e41; /* Even darker green on click */
+    transform: scale(0.98); /* Slight press-down effect */
+}
+
+.export-buttons {
+    display: flex; /* Use flexbox for row alignment */
+    gap: 10px; /* Add spacing between buttons */
+    justify-content: flex-start; /* Align buttons to the left */
+    margin-top: 20px;
+}
+
+.btn {
+    background-color: #4CAF50; /* Green background */
+    color: white; /* White text */
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.2s;
+    text-align: center;
+}
+
+.btn:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+}
+
+.btn:active {
+    background-color: #3e8e41;
+    transform: scale(0.98);
+}
+
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Navigation -->
+        <nav>
+            <div class="nav-container">
+                <h1 class="logo">ERP Budgeting</h1>
+                <ul class="nav-links">
+                    <li><a href="{% url 'dashboard' %}">Budget Planning</a></li>
+                    <li><a href="5.html">Allocations</a></li>
+                    <li><a href="#">Reports</a></li>
+                    <li><a href="#">Settings</a></li>
+                </ul>
+                <div class="hamburger-menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </nav>
+
+        <main>
+            <section class="report-section">
+                <h2>Company and Department Report</h2>
+
+                <!-- Filter Form -->
+                <form method="GET" class="filter-box">
+                    {{ form.as_p }}
+                    <button type="submit" class="btn">Filter</button>
+                </form>
+
+                <!-- Report Table -->
+                <table class="allocations-table">
+                    <thead>
+                        <tr>
+                            {% if department_budgets %}
+                                <th>Company</th>
+                                <th>Department</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Allocated Amount</th>
+                            {% elif budget_requests %}
+                                <th>Company</th>
+                                <th>Department</th>
+                                <th>Budget Name</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Comment</th>
+                                <th>Allocated Amount</th>
+                                <th>Status</th>
+                            {% else %}
+                                <th>Company</th>
+                                <th>Code</th>
+                                <th>Allocated Budget</th>
+                                <th>Budget Year</th>
+                                <th>Departments</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if department_budgets %}
+                            {% for db in department_budgets %}
+                                <tr>
+                                    <td>{{ db.department.company.name }}</td>
+                                    <td>{{ db.department.name }}</td>
+                                    <td>{{ db.start_date }}</td>
+                                    <td>{{ db.end_date }}</td>
+                                    <td>{{ db.allocated_amount }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% elif budget_requests %}
+                            {% for br in budget_requests %}
+                                <tr>
+                                    <td>{{ br.company.name }}</td>
+                                    <td>{{ br.department.name }}</td>
+                                    <td>{{ br.budget_name }}</td>
+                                    <td>{{ br.start_date }}</td>
+                                    <td>{{ br.end_date }}</td>
+                                    <td>{{ br.comment }}</td>
+                                    <td>{{ br.allocated_amount }}</td>
+                                    <td>{{ br.status }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            {% for row in data %}
+                                <tr>
+                                    <td>{{ row.Company }}</td>
+                                    <td>{{ row.Code }}</td>
+                                    <td>{{ row.Allocated_Budget }}</td>
+                                    <td>{{ row.Budget_Year }}</td>
+                                    <td>{{ row.Departments }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                    </tbody>
+                </table>
+
+                <div class="export-buttons">
+                    <form method="GET">
+                        <input type="hidden" name="export" value="true">
+                        <button type="submit" class="btn">Export to Excel</button>
+                    </form>
+                    <form method="GET">
+                        <input type="hidden" name="export_pdf" value="true">
+                        <button type="submit" class="btn">Export to PDF</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const hamburgerMenu = document.querySelector('.hamburger-menu');
+        const navLinks = document.querySelector('.nav-links');
+
+        hamburgerMenu.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+    </script>
+
+</body>
+</html>

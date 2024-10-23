@@ -188,3 +188,35 @@ class Overview(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.opportunity}"
+    
+
+##################################### Budget & Forecasting #####################################################
+
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    code = models.CharField(max_length=10, unique=True)
+    allocated_budget = models.DecimalField(max_digits=10, decimal_places=2)
+    budget_year = models.IntegerField()
+
+class Department(models.Model):
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+
+class DepartmentBudget(models.Model):
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    allocated_amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+class BudgetRequest(models.Model):
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    budget_name = models.CharField(max_length=255)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    comment = models.TextField(null=True, blank=True)
+    allocated_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=50, default='Pending')  # 'Pending', 'Approved'
+
+    def __str__(self):
+        return f"{self.budget_name} - {self.status}"

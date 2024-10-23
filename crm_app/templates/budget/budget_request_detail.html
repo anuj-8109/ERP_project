@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Request Details</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* Table Styling */
+        table {
+            width: 60%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Button Styling */
+        form {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button[name="approve"] {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        button[name="reject"] {
+            background-color: #f44336;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        /* Link Styling */
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Budget Request Details</h1>
+
+    <table border="1">
+        <tr>
+            <th>Company</th>
+            <td>{{ budget_request.company.name }}</td>
+        </tr>
+        <tr>
+            <th>Department</th>
+            <td>{{ budget_request.department.name }}</td>
+        </tr>
+        <tr>
+            <th>Budget Name</th>
+            <td>{{ budget_request.budget_name }}</td>
+        </tr>
+        <tr>
+            <th>Start Date</th>
+            <td>{{ budget_request.start_date }}</td>
+        </tr>
+        <tr>
+            <th>End Date</th>
+            <td>{{ budget_request.end_date }}</td>
+        </tr>
+        <tr>
+            <th>Allocated Amount</th>
+            <td>{{ budget_request.allocated_amount }}</td>
+        </tr>
+        <tr>
+            <th>Comment</th>
+            <td>{{ budget_request.comment }}</td>
+        </tr>
+        <tr>
+            <th>Status</th>
+            <td>{{ budget_request.status }}</td>
+        </tr>
+    </table>
+
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" name="approve">Approve</button>
+        <button type="submit" name="reject">Reject</button>
+    </form>
+
+    <a href="/">Go back to Home</a>
+</body>
+</html>

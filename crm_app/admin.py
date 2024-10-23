@@ -47,3 +47,49 @@ class ProfileAdmin(admin.ModelAdmin):
 
 
 # admin.site.register(MiningData)
+
+##################################### Budget & Forecasting #####################################################
+
+from .models import Company, Department, DepartmentBudget, BudgetRequest
+
+@admin.register(Company)
+class CompanyAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'code', 'allocated_budget', 'budget_year')
+    search_fields = ('name', 'code')
+    list_filter = ('budget_year',)
+    ordering = ('name',)
+    fields = ('name', 'code', 'allocated_budget', 'budget_year')
+
+@admin.register(Department)
+class DepartmentAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'company')
+    search_fields = ('name',)
+    list_filter = ('company',)
+    ordering = ('name',)
+    fields = ('name', 'company')
+
+@admin.register(DepartmentBudget)
+class DepartmentBudgetAdmin(admin.ModelAdmin):
+    list_display = ('id', 'department', 'start_date', 'end_date', 'allocated_amount')
+    search_fields = ('department__name',)
+    list_filter = ('start_date', 'end_date', 'department__company')
+    ordering = ('-start_date',)
+    fields = ('department', 'start_date', 'end_date', 'allocated_amount')
+
+class BudgetRequestAdmin(admin.ModelAdmin):
+    list_display = (
+        'budget_name', 
+        'company', 
+        'department', 
+        'allocated_amount', 
+        'start_date', 
+        'end_date', 
+        'status'
+    )
+    list_filter = ('company', 'department', 'status', 'start_date', 'end_date')
+    search_fields = ('budget_name', 'company__name', 'department__name')
+    date_hierarchy = 'start_date'
+    readonly_fields = ('status',)
+    ordering = ('-start_date',)
+
+admin.site.register(BudgetRequest, BudgetRequestAdmin)
